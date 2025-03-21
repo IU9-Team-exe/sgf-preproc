@@ -2,6 +2,9 @@ import json
 import sgfmill.sgf
 import sgfmill.sgf_moves
 from deep_translator import GoogleTranslator
+from langdetect import detect, DetectorFactory
+
+DetectorFactory.seed = 0
 
 # Форматирование хода в читаемый вид (например, "D4")
 def format_move(color, move):
@@ -44,10 +47,18 @@ def get_variations(node):
             variations.append(format_move(color, move))
     return variations
 
-# Перевод текста на английский язык
+# Перевод текста, если он не на английском
 def translate_to_english(text):
+    if is_english(text):
+        return text
     translator = GoogleTranslator(source='auto', target='en')
     return translator.translate(text)
+
+def is_english(text):
+    try:
+        return detect(text) == 'en'
+    except:
+        return False
 
 # Обработка одного SGF-файла
 def process_sgf(sgf_content):

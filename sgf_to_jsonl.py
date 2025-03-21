@@ -95,7 +95,7 @@ def sgf_to_jsonl(sgf_file, jsonl_file):
         for example in examples:
             f.write(json.dumps(example, ensure_ascii=False) + "\n")
 
-# Пример использования
+
 if __name__ == "__main__":
     sgf_file = "./test/pro_1.sgf"  # Укажите путь к вашему SGF-файлу
     jsonl_file = "output.jsonl"  # Укажите путь для выходного файла

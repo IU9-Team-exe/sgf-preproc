@@ -3,6 +3,7 @@ import sgfmill.sgf
 import sgfmill.sgf_moves
 from deep_translator import GoogleTranslator
 from langdetect import detect, DetectorFactory
+import os
 
 DetectorFactory.seed = 0
 
@@ -102,19 +103,32 @@ def process_sgf(sgf_content):
     return examples
 
 # Преобразование SGF в JSONL
-def sgf_to_jsonl(sgf_file, jsonl_file):
-    with open(sgf_file, "r", encoding="utf-8") as f:
-        sgf_content = f.read()
-
-    examples = process_sgf(sgf_content)
-
-    with open(jsonl_file, "w", encoding="utf-8") as f:
-        for example in examples:
-            f.write(json.dumps(example, ensure_ascii=False) + "\n")
+# Преобразование SGF в JSONL
+def sgf_to_jsonl(input_path, output_file):
+    if os.path.isfile(input_path):  # Если передан один файл
+        with open(input_path, "r", encoding="utf-8") as f:
+            sgf_content = f.read()
+        examples = process_sgf(sgf_content)
+        with open(output_file, "w", encoding="utf-8") as f:
+            for example in examples:
+                f.write(json.dumps(example, ensure_ascii=False) + "\n")
+    elif os.path.isdir(input_path):  # Если передана директория
+        for root, _, files in os.walk(input_path):
+            for file in files:
+                if file.endswith(".sgf"):
+                    sgf_file = os.path.join(root, file)
+                    with open(sgf_file, "r", encoding="utf-8") as f:
+                        sgf_content = f.read()
+                    examples = process_sgf(sgf_content)
+                    with open(output_file, "a", encoding="utf-8") as f:
+                        for example in examples:
+                            f.write(json.dumps(example, ensure_ascii=False) + "\n")
+    else:
+        print(f"Ошибка: {input_path} не является файлом или директорией.")
 
 # Пример использования
 if __name__ == "__main__":
-    sgf_file = "./test/pro_1.sgf"  # Укажите путь к вашему SGF-файлу
-    jsonl_file = "output.jsonl" # Укажите путь для выходного файла
+    sgf_file = "./pro"  # Укажите путь к вашему SGF-файлу
+    jsonl_file = "pro.jsonl" # Укажите путь для выходного файла
     sgf_to_jsonl(sgf_file, jsonl_file)
     print(f"Обработка завершена. Результат сохранен в {jsonl_file}")

@@ -1,7 +1,7 @@
 import json
 import sgfmill.sgf
 import sgfmill.sgf_moves
-import sgfmill.boards
+from deep_translator import GoogleTranslator
 
 # Форматирование хода в читаемый вид (например, "D4")
 def format_move(color, move):
@@ -11,15 +11,16 @@ def format_move(color, move):
     letters = "ABCDEFGHJKLMNOPQRST"  # Пропускаем 'I' в соответствии со стандартом Го
     return f"{letters[col]}{19 - row}"
 
-# Получение последовательности ходов до текущего узла
+# Получение последовательности ходов до текущего узла, исключая корневой узел
 def get_move_sequence(node):
     sequence = []
-    while node.parent:
-        color, move = node.parent.get_move()
+    current = node
+    while current.parent and current.parent.parent:  # Исключаем корень
+        color, move = current.get_move()
         if color:
             sequence.append(format_move(color, move))
-        node = node.parent
-    return sequence[::-1]  # Переворачиваем для хронологического порядка
+        current = current.parent
+    return sequence[::-1]  # Хронологический порядок
 
 # Получение следующих ходов (до 3-х)
 def get_next_moves(node, limit=3):
@@ -31,17 +32,22 @@ def get_next_moves(node, limit=3):
         color, move = current.get_move()
         if color:
             next_moves.append(format_move(color, move))
-        current = current[0] if current else None  # Берем основную ветку
+        current = current[0] if current else None  # Основная ветка
     return next_moves
 
 # Получение вариантов ответвлений
 def get_variations(node):
     variations = []
-    for child in node[1:]:  # Пропускаем первый дочерний узел (основная последовательность)
+    for child in node[1:]:  # Пропускаем основную ветку
         color, move = child.get_move()
         if color:
             variations.append(format_move(color, move))
     return variations
+
+# Перевод текста на английский язык
+def translate_to_english(text):
+    translator = GoogleTranslator(source='auto', target='en')
+    return translator.translate(text)
 
 # Обработка одного SGF-файла
 def process_sgf(sgf_content):
@@ -52,34 +58,34 @@ def process_sgf(sgf_content):
         return []
 
     examples = []
-    # Проходим по основной последовательности ходов
     for node in game.get_main_sequence():
-        # Проверяем наличие комментария
-        if node.has_property("C"):
+        if node.has_property("C"):  # Проверяем наличие комментария
             comment = node.get("C")
-            # Получаем текущий ход
+            translated_comment = translate_to_english(comment)  # Переводим комментарий
             color, move = node.get_move()
             if not color:
                 continue  # Пропускаем узлы без ходов
 
-            # Собираем данные для prompt
+            # Собираем данные для промпта
             move_sequence = get_move_sequence(node)
             current_move = format_move(color, move)
             next_moves = get_next_moves(node[0] if node else None)
             variations = get_variations(node)
 
-            # Формируем prompt
-            prompt = f"Партия: {' '.join(move_sequence)}\n"
-            prompt += f"Текущий ход: {current_move}\n"
+            # Формируем промпт на английском языке
+            prompt = f"Sequence of moves: {' '.join(move_sequence)}\n"
+            prompt += f"Current move: {current_move}\n"
             if next_moves:
-                prompt += f"Следующие ходы: {' '.join(next_moves)}\n"
+                prompt += f"Next moves: {' '.join(next_moves)}\n"
             if variations:
-                prompt += f"Разбор вариантов: {' '.join(variations)}"
+                prompt += f"Variations: {' '.join(variations)}"
 
             # Создаем обучающий пример
             example = {
-                "prompt": prompt,
-                "completion": comment
+                "messages": [
+                    {"role": "user", "content": prompt},
+                    {"role": "assistant", "content": translated_comment}
+                ]
             }
             examples.append(example)
     return examples
@@ -95,9 +101,9 @@ def sgf_to_jsonl(sgf_file, jsonl_file):
         for example in examples:
             f.write(json.dumps(example, ensure_ascii=False) + "\n")
 
-
+# Пример использования
 if __name__ == "__main__":
     sgf_file = "./test/pro_1.sgf"  # Укажите путь к вашему SGF-файлу
-    jsonl_file = "output.jsonl"  # Укажите путь для выходного файла
+    jsonl_file = "output.jsonl" # Укажите путь для выходного файла
     sgf_to_jsonl(sgf_file, jsonl_file)
     print(f"Обработка завершена. Результат сохранен в {jsonl_file}")

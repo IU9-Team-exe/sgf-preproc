@@ -103,7 +103,6 @@ def process_sgf(sgf_content):
     return examples
 
 # Преобразование SGF в JSONL
-# Преобразование SGF в JSONL
 def sgf_to_jsonl(input_path, output_file):
     if os.path.isfile(input_path):  # Если передан один файл
         with open(input_path, "r", encoding="utf-8") as f:

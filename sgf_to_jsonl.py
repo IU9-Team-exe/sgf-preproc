@@ -19,7 +19,7 @@ def format_move(color, move):
 def get_move_sequence(node):
     sequence = []
     current = node
-    while current.parent and current.parent.parent:  # Исключаем корень
+    while current.parent:  # Теперь включаем корневой узел
         color, move = current.get_move()
         if color:
             sequence.append(format_move(color, move))
@@ -65,14 +65,22 @@ def is_english(text):
 def process_sgf(sgf_content):
     try:
         game = sgfmill.sgf.Sgf_game.from_string(sgf_content)
+        print("SGF файл успешно загружен")
     except ValueError as e:
         print(f"Ошибка парсинга SGF: {e}")
         return []
 
     examples = []
+    move_count = 0
     for node in game.get_main_sequence():
         if node.has_property("C"):  # Проверяем наличие комментария
+            move_count += 1
+            if move_count <= 3:  # Пропускаем комментарии первых 3 ходов
+                print(f"Пропущен комментарий хода {move_count}")
+                continue
+                
             comment = node.get("C")
+            print(f"Обработка комментария хода {move_count}: {comment[:50]}...")
             translated_comment = translate_to_english(comment)  # Переводим комментарий
             color, move = node.get_move()
             if not color:
@@ -128,9 +136,9 @@ def sgf_to_jsonl(input_path, output_file):
 
 # Пример использования
 if __name__ == "__main__":
-    sgf_file = "./Sorin_Gherman"  # Укажите путь к вашему SGF-файлу
-    # sgf_file = "./test/special_2.sgf"
-    jsonl_file = "big_reviews.jsonl" # Укажите путь для выходного файла
-    # jsonl_file = "test.jsonl"
+    # sgf_file = "./Sorin_Gherman"  # Укажите путь к вашему SGF-файлу
+    sgf_file = r".\KGS_Comments\teaching13k.sgf"  # Используем raw string для Windows путей
+    # jsonl_file = "big_reviews.jsonl" # Укажите путь для выходного файла
+    jsonl_file = "test.jsonl"
     sgf_to_jsonl(sgf_file, jsonl_file)
     print(f"Обработка завершена. Результат сохранен в {jsonl_file}")

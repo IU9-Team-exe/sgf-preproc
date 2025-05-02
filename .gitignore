@@ -14,3 +14,26 @@ test/
 *.jsonl
 pro.jsonl~
 instrucuion.md
+sgf-reviews/
+KGS_Comments/
+gtl.xmp.net/
+Group/
+Gosei (WU) 1976-1999/
+Gosei (Wu) 1929-1973/
+Go Seigen 1/
+Go_Game_World/
+Go Seigen/
+Go Seigen Commented Games/
+Go Seigen - Commented games (from Jim's book)/
+Go on Go - The Analyzed Games of Go Seigen (SGF)/
+Dinershtein dlya sente/
+DangHuGames/
+commented_games/
+Cho Chikun Overview(new)/
+810 Commented pro games by A. Dinerstein (SGF)/
+20-japanese-games-2003-2004/
+Sugiuchi Masao + Ishida Yoshio + Takemiya Masaki/
+20-30k/
+10-19k/
+1-9k/
+.venv/

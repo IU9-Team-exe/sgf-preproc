@@ -1,0 +1,16 @@
+*.sgf
+doc/
+games/
+games1/
+kgs/
+KGS_Plus_Reviews/
+Liyue_Lessons/
+pro/
+reviews/
+Sorin_Gherman/
+special/
+test/
+.pro.jsonl.un~
+*.jsonl
+pro.jsonl~
+instrucuion.md

@@ -91,7 +91,8 @@ def process_sgf(sgf_content):
                 prompt += f"Next moves: {' '.join(next_moves)}\n"
             if variations:
                 prompt += f"Variations: {' '.join(variations)}"
-
+            if not translated_comment:
+                translated_comment = "nothing"
             # Создаем обучающий пример
             example = {
                 "messages": [
@@ -127,7 +128,9 @@ def sgf_to_jsonl(input_path, output_file):
 
 # Пример использования
 if __name__ == "__main__":
-    sgf_file = "./pro"  # Укажите путь к вашему SGF-файлу
-    jsonl_file = "pro.jsonl" # Укажите путь для выходного файла
+    sgf_file = "./Sorin_Gherman"  # Укажите путь к вашему SGF-файлу
+    # sgf_file = "./test/special_2.sgf"
+    jsonl_file = "big_reviews.jsonl" # Укажите путь для выходного файла
+    # jsonl_file = "test.jsonl"
     sgf_to_jsonl(sgf_file, jsonl_file)
     print(f"Обработка завершена. Результат сохранен в {jsonl_file}")
